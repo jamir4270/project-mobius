@@ -39,6 +39,14 @@ export function SignUpForm({
       return;
     }
 
+    const vsuRegex = /^[a-zA-Z0-9._%+-]+@vsu\.edu\.ph$/;
+    if (!vsuRegex.test(email)) {
+      setError(
+        "Unauthorized domain. You must use a valid @vsu.edu.ph email address.",
+      );
+      setIsLoading(false);
+    }
+
     try {
       const { error } = await supabase.auth.signUp({
         email,
