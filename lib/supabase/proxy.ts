@@ -40,6 +40,15 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
+  //i made this
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select()
+    .eq("email", user?.email)
+    .single();
+
+  const role = profile?.role;
+
   if (
     request.nextUrl.pathname !== "/" &&
     !user &&
@@ -49,6 +58,16 @@ export async function updateSession(request: NextRequest) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
+    return NextResponse.redirect(url);
+  }
+
+  //this is what i created
+  if (
+    request.nextUrl.pathname.startsWith("/create-flowchart") &&
+    role !== "admin"
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/flowchart";
     return NextResponse.redirect(url);
   }
 
