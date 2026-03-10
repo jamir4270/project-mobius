@@ -29,7 +29,6 @@ export function SignUpForm({
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
@@ -39,20 +38,29 @@ export function SignUpForm({
       return;
     }
 
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/protected`,
-        },
-      });
-      if (error) throw error;
-      router.push("/auth/sign-up-success");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
-    } finally {
+    const vsuRegex = /^[a-zA-Z0-9._%+-]+@vsu\.edu\.ph$/;
+    if (!vsuRegex.test(email)) {
+      setError(
+        "Unauthorized domain. You must use a valid @vsu.edu.ph email address.",
+      );
       setIsLoading(false);
+    } else {
+      try {
+        const supabase = createClient();
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/protected`,
+          },
+        });
+        if (error) throw error;
+        router.push("/auth/sign-up-success");
+      } catch (error: unknown) {
+        setError(error instanceof Error ? error.message : "An error occurred");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
